@@ -1,0 +1,16 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.env
+
+# generated semantic index + catalog data -- rebuild locally, never commit
+data/
+data-bge-base/
+docs/data/
+docs/interface_catalog.md
+
+# local project config -- copy projects.example.json -> projects.json
+projects.json

@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "project-a": {
+      "enabled": true,
+      "services": ["service-a"],
+      "paths": [
+        "service-a/**",
+        "service-b/**/foo*"
+      ]
+    },
+    "project-b": {
+      "enabled": false,
+      "services": ["service-b", "service-c"],
+      "paths": [
+        "service-b/api/**",
+        "service-c/**/bar*"
+      ]
+    }
+  }
+}

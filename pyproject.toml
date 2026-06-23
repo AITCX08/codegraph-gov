@@ -1,0 +1,26 @@
+[project]
+name = "codegraph-gov"
+version = "0.1.0"
+description = "Local reuse-governance over a codegraph index: find existing symbols by intent before writing new ones (FTS + semantic, exposed as an MCP tool)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "fastembed>=0.3",
+    "mcp>=1.0",
+    "numpy>=1.26",
+    "openai>=1.30",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+cg_gov = "cg_gov.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cg_gov*"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
