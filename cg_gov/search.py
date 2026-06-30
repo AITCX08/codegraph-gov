@@ -31,5 +31,11 @@ def load_index(data_dir: Path = DATA_DIR):
 def semantic_search(intent: str, embedder, k: int = 10, data_dir: Path = DATA_DIR):
     vecs, meta = load_index(data_dir)
     qvec = embedder.embed([intent])[0]
+    if vecs.shape[0] and vecs.shape[1] != qvec.shape[0]:
+        raise RuntimeError(
+            f"embedding dimension mismatch: index dim={vecs.shape[1]}, "
+            f"query dim={qvec.shape[0]}. Rebuild the index with the same "
+            "CODEGRAPH_EMBED_MODEL and restart the MCP server."
+        )
     hits = cosine_topk(qvec, vecs, k=k)
     return [{**meta[i], "score": s} for i, s in hits]

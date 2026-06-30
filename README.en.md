@@ -139,8 +139,41 @@ pip install -e .
 | `CODEGRAPH_DB_PATH` | `$CODEGRAPH_WORKSPACE_ROOT/.codegraph/codegraph.db` | the read-only codegraph DB |
 | `CODEGRAPH_BLACKLIST_ROOTS` | *(empty)* | comma-separated top-level dirs to treat as vendored |
 | `CODEGRAPH_DOCS_MARKDOWN_OUT` | `docs/interface_catalog.md` | where `gen-docs` writes markdown |
+| `CODEGRAPH_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` | local fastembed model; rebuild the index and restart MCP after changing it |
+| `CODEGRAPH_QUERY_EXPANSION` | `1` | enable query expansion |
+| `CODEGRAPH_QUERY_ALIASES_JSON` / `CODEGRAPH_QUERY_ALIASES_FILE` | *(empty)* | business-language aliases as a JSON object |
+| `CODEGRAPH_DOC_HINT_ROOTS` | *(empty)* | colon-separated markdown roots used only as low-confidence query hints |
+| `CODEGRAPH_DOC_HINT_MAX_AGE_DAYS` | `30` | freshness window for markdown hints; stale docs are downweighted |
+| `CODEGRAPH_DOC_HINTS` | `1` | enable markdown hints |
 | `OPENAI_API_KEY` / `OPENAI_BASE_URL` | *(unset)* | only if you switch to the API embedder |
 | `GITEA_HOST` / `GITEA_OWNER` / `GITEA_TOKEN` | examples | only for `perception-scan` |
+
+### Query Expansion: Business Language → Code Terms
+
+`reuse` now keeps the original intent, creates expanded query variants, and
+fuses all routes with weighted RRF:
+
+1. Original FTS + original semantic search.
+2. Built-in small aliases plus project-specific aliases from
+   `CODEGRAPH_QUERY_ALIASES_JSON` / `CODEGRAPH_QUERY_ALIASES_FILE`.
+3. Optional markdown hints: identifiers in backticks on lines that mention the
+   user's business terms. Docs are low-confidence hints only; final answers
+   still come from codegraph symbols / schema files.
+
+Example:
+
+```bash
+export CODEGRAPH_QUERY_ALIASES_JSON='{"dedicated pool":["dedicated_user_id","strategy_group_id"]}'
+python -m cg_gov.cli reuse "where is the dedicated pool routing relationship"
+```
+
+For multilingual embeddings, set `CODEGRAPH_EMBED_MODEL`, rebuild the index, and
+restart long-lived MCP clients:
+
+```bash
+export CODEGRAPH_EMBED_MODEL=BAAI/bge-m3
+python -m cg_gov.cli index
+```
 
 ## 9. Usage
 

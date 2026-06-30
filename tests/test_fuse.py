@@ -1,4 +1,4 @@
-from cg_gov.fuse import rrf_merge
+from cg_gov.fuse import rrf_merge, rrf_merge_weighted
 
 
 def test_rrf_merges_and_ranks():
@@ -30,3 +30,8 @@ def test_rrf_dedupes_within_a_list():
 def test_rrf_empty():
     assert rrf_merge([]) == []
     assert rrf_merge([[], []]) == []
+
+
+def test_weighted_rrf_downweights_hint_lists():
+    fused = rrf_merge_weighted([["a"], ["b"]], weights=[1.0, 0.1])
+    assert [i for i, _score, _src in fused] == ["a", "b"]

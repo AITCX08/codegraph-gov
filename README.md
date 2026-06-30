@@ -114,10 +114,40 @@ pip install -e .
 | `CODEGRAPH_DB_PATH` | `$CODEGRAPH_WORKSPACE_ROOT/.codegraph/codegraph.db` | 只读的 codegraph 索引 |
 | `CODEGRAPH_BLACKLIST_ROOTS` | *(空)* | 逗号分隔的顶层目录名，当作 vendored 剔除 |
 | `CODEGRAPH_DOCS_MARKDOWN_OUT` | `docs/interface_catalog.md` | `gen-docs` 输出 markdown 的位置 |
+| `CODEGRAPH_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` | 本地 fastembed 模型；切换后必须重建 index 并重启 MCP |
+| `CODEGRAPH_QUERY_EXPANSION` | `1` | 是否启用查询扩展 |
+| `CODEGRAPH_QUERY_ALIASES_JSON` / `CODEGRAPH_QUERY_ALIASES_FILE` | *(空)* | 业务词到工程词的别名表(JSON object) |
+| `CODEGRAPH_DOC_HINT_ROOTS` | *(空)* | 冒号分隔的 markdown 文档根目录，只做低权重 query hint |
+| `CODEGRAPH_DOC_HINT_MAX_AGE_DAYS` | `30` | 文档 hint 的新鲜度阈值，超期自动降权 |
+| `CODEGRAPH_DOC_HINTS` | `1` | 是否启用文档 hint |
 | `OPENAI_API_KEY` / `OPENAI_BASE_URL` | *(未设)* | 仅当你切换到 API 嵌入器时才需要 |
 | `GITEA_HOST` / `GITEA_OWNER` / `GITEA_TOKEN` | 示例值 | 仅 `perception-scan` 需要 |
 
 按项目切分的接口文档配置在 `projects.json`（可复制 `projects.example.json` 起步）。
+
+### 查询扩展: 中文 / 业务词 → 工程词
+
+`reuse` 会先保留原始意图,再自动生成若干扩展 query,最后用加权 RRF 融合:
+
+1. 原始 FTS + 原始语义检索。
+2. 内置少量常见别名,以及你通过 `CODEGRAPH_QUERY_ALIASES_JSON` / `CODEGRAPH_QUERY_ALIASES_FILE` 配置的业务词典。
+3. 可选 markdown 文档 hint: 从包含业务词的文档行里抽取反引号中的代码标识符。文档只做低权重提示,最终答案仍落回 codegraph 符号 / schema 文件。
+
+例:
+
+```bash
+export CODEGRAPH_QUERY_ALIASES_JSON='{"达人专属池":["dedicated_user_id","managed_strategy_group","managed_dedicated_assignment"]}'
+python -m cg_gov.cli reuse "查一下达人专属池和内容池路由"
+```
+
+如需用多语言 embedding,可设置 `CODEGRAPH_EMBED_MODEL` 后重建:
+
+```bash
+export CODEGRAPH_EMBED_MODEL=BAAI/bge-m3
+python -m cg_gov.cli index
+```
+
+长驻 MCP 进程会缓存模型和索引,重建后请重启 agent / MCP server。
 
 ## 九、用法
 

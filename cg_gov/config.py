@@ -36,3 +36,25 @@ BLACKLIST_ROOTS = frozenset(
     s.strip() for s in os.environ.get("CODEGRAPH_BLACKLIST_ROOTS", "").split(",")
     if s.strip()
 )
+
+# Local embedding model used by LocalFastembed. If you switch this after
+# building emb.npy, rebuild the index and restart long-lived MCP clients.
+EMBED_MODEL = (
+    os.environ.get("CODEGRAPH_EMBED_MODEL", "BAAI/bge-small-en-v1.5").strip()
+    or "BAAI/bge-small-en-v1.5"
+)
+
+# Optional markdown roots that can provide low-confidence query-expansion hints.
+# Empty by default because docs may be stale and project-specific.
+DOC_HINT_ROOTS = [
+    Path(p).expanduser()
+    for p in os.environ.get("CODEGRAPH_DOC_HINT_ROOTS", "").split(":")
+    if p.strip()
+]
+
+try:
+    DOC_HINT_MAX_AGE_DAYS = max(
+        1, int(os.environ.get("CODEGRAPH_DOC_HINT_MAX_AGE_DAYS", "30"))
+    )
+except ValueError:
+    DOC_HINT_MAX_AGE_DAYS = 30

@@ -60,6 +60,9 @@ def cmd_reuse(args):
     _print_index_banner()
     res = reuse_candidates(args.intent, k=args.k)
     print(f"## reuse candidates for: {args.intent}")
+    aliases = res.get("query_expansion", {}).get("aliases") or []
+    if aliases:
+        print(f"## expanded aliases: {aliases[:12]}")
     for c in res["candidates"]:
         src = "+".join(c["sources"])
         loc = f'{c["abs_path"]}:{c["start_line"]}'

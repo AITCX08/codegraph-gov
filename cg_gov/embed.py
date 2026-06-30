@@ -1,12 +1,14 @@
 import os
 import numpy as np
+from .config import EMBED_MODEL
 
 
 class LocalFastembed:
     """Local ONNX embedding (no network). The default embedder."""
 
-    def __init__(self, model: str = "BAAI/bge-small-en-v1.5"):
+    def __init__(self, model: str | None = None):
         from fastembed import TextEmbedding
+        model = model or EMBED_MODEL
         self._model = TextEmbedding(model_name=model)
         self._model_name = model
 
